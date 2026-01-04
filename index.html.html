@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Jaggi Music Studio</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap');
+body{margin:0;font-family:'Poppins',sans-serif;background:#f4f6f8;color:#222}
+header{background:linear-gradient(120deg,rgba(27,27,27,.95),rgba(90,15,46,.95),rgba(140,29,24,.95)),url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4');background-size:cover;background-position:center;color:#fff;padding:24px 30px;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-family:'Playfair Display',serif;font-size:34px;background:linear-gradient(90deg,#ffb703,#f72585,#c9184a);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+nav{margin-top:10px}
+nav a{color:#fff;margin-right:20px;cursor:pointer;font-weight:600}
+.slider{height:320px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:42px;font-family:'Playfair Display',serif;background-size:cover;background-position:center;animation:slide 15s infinite}
+@keyframes slide{0%{background-image:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),url('https://images.unsplash.com/photo-1511379938547-c1f69419868d')}50%{background-image:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),url('https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2')}100%{background-image:linear-gradient(rgba(0,0,0,.6),rgba(0,0,0,.6)),url('https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4')}}
+.container{padding:40px}
+.card{background:#fff;padding:26px;border-radius:12px;margin-bottom:30px;box-shadow:0 6px 16px rgba(0,0,0,.12)}
+input,button{width:100%;padding:14px;margin-top:12px;border-radius:6px}
+button{border:none;background:#111;color:#fff;font-weight:600;cursor:pointer}
+audio{width:100%;margin-top:10px}
+.hidden{display:none}
+.success-box{margin-top:16px;padding:14px;border-left:4px solid #2ec4b6;background:#ecfdfb;border-radius:8px}
+.success-box a{display:inline-block;margin-top:6px;color:#c9184a;font-weight:600;cursor:pointer}
+footer{background:#111;color:#ccc;text-align:center;padding:22px}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🎵 Jaggi Music Studio</h1>
+<nav>
+<a onclick="showPage('home')">Home</a>
+<a onclick="showPage('upload')">Upload</a>
+<a onclick="showPage('songs')">All Songs</a>
+<a onclick="showPage('earn')">Earnings</a>
+</nav>
+</header>
+
+<div class="slider" id="home">Welcome to Jaggi Music Studio</div>
+
+<div class="container">
+<div class="card" id="homeContent">
+<h2>Where Music Comes Alive</h2>
+<p>A creative platform for independent artists.</p>
+</div>
+
+<div class="card hidden" id="upload">
+<h2>Upload Your Music</h2>
+<input type="text" id="artistName" placeholder="Enter Artist Name" />
+<input type="text" id="songTitle" placeholder="Enter Song Title" />
+<input type="file" id="songFile" accept="audio/*" />
+<input type="file" id="coverFile" accept="image/*" />
+<button onclick="uploadSong()">Upload Song</button>
+</div>
+
+<div class="card hidden" id="songs">
+<h2>All Songs</h2>
+<div id="songList"></div>
+</div>
+
+<div class="card hidden" id="earn">
+<h2>Your Earnings</h2>
+<p>Plays: <strong id="plays">0</strong></p>
+<p>Earnings: $<strong id="money">0.00</strong></p>
+</div>
+</div>
+
+<!-- Upload Success Modal -->
+<div id="uploadModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;padding:28px;width:90%;max-width:420px;border-radius:14px;text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.35);animation:popIn 0.3s ease;">
+    <h2>🎉 Upload Successful</h2>
+    <p>Your song is live on <strong>Jaggi Music Studio</strong></p>
+    <div id="modalPlayer"></div>
+    <button onclick="showPage('songs'); closeModal()">🎧 Go to All Songs</button>
+    <button onclick="closeModal()" style="margin-top:10px;background:#555;">Close</button>
+  </div>
+</div>
+
+<style>@keyframes popIn {from {transform:scale(.9);opacity:0} to {transform:scale(1);opacity:1}}</style>
+
+<footer>© 2026 Jaggi Music Studio</footer>
+
+<script>
+let totalPlays=0; const ratePerPlay=0.01;
+function showPage(p){document.getElementById('home').style.display=p==='home'?'flex':'none';['upload','songs','earn'].forEach(x=>document.getElementById(x).classList.add('hidden'));if(p!=='home')document.getElementById(p).classList.remove('hidden');}
+function uploadSong(){
+const artist=document.getElementById('artistName').value||'Unknown Artist';
+const title=document.getElementById('songTitle').value;
+const file=document.getElementById('songFile').files[0];
+const coverFile=document.getElementById('coverFile').files[0];
+if(!title||!file){alert('Please enter title and select an audio file.');return;}
+const songURL=URL.createObjectURL(file);
+const coverURL=coverFile?URL.createObjectURL(coverFile):'https://via.placeholder.com/150';
+const songDiv=document.createElement('div');
+songDiv.className='card';
+songDiv.innerHTML=`<img src='${coverURL}' alt='${title}' style='width:100%;max-height:180px;border-radius:8px;object-fit:cover;margin-bottom:10px;'><h4>${title}</h4><p>By: <strong>${artist}</strong></p><audio controls onplay='countPlay()'><source src='${songURL}'></audio><a href='${songURL}' download='${title}.mp3' style='display:inline-block;margin-top:10px;padding:10px 16px;background:#111;color:#fff;border-radius:6px;text-decoration:none;font-weight:600;'>⬇ Download Song</a>`;
+document.getElementById('songList').appendChild(songDiv);
+document.getElementById('modalPlayer').innerHTML=`<img src='${coverURL}' alt='${title}' style='width:100%;max-height:200px;border-radius:8px;object-fit:cover;margin-bottom:10px;'><h4>${title}</h4><p>By: <strong>${artist}</strong></p><audio controls autoplay style='width:100%;margin-top:10px;'><source src='${songURL}'></audio><a href='${songURL}' download='${title}.mp3' style='display:inline-block;margin-top:12px;font-weight:600;color:#c9184a;'>⬇ Download this song</a>`;
+document.getElementById('uploadModal').style.display='flex';
+document.getElementById('artistName').value='';document.getElementById('songTitle').value='';document.getElementById('songFile').value='';document.getElementById('coverFile').value='';}
+function closeModal(){document.getElementById('uploadModal').style.display='none';}
+function countPlay(){totalPlays++;document.getElementById('plays').innerText=totalPlays;document.getElementById('money').innerText=(totalPlays*ratePerPlay).toFixed(2);}
+</script>
+
+</body>
+</html>
